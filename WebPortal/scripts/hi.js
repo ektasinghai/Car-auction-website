@@ -1,0 +1,230 @@
+
+
+<script type="text/babel">
+
+
+class BasicForm extends React.Component {
+
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      name2: '',
+      phoneNo: '',
+      username: '',
+      password: '',
+      passwordConfirm: ''
+
+    };
+
+    this.handleChange = this.handleChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+  }
+
+  handleChange(e) {
+    e.target.classList.add('active');
+
+    this.setState({
+      [e.target.name]: e.target.value
+    });
+
+    this.showInputError(e.target.name);
+  }
+
+  handleSubmit(e) {
+    e.preventDefault();
+    console.log(e);
+
+    console.log('component state', JSON.stringify(this.state));
+
+    if (!this.showFormErrors()) {
+      console.log('form is invalid: do not submit');
+    } else {
+      console.log('form is valid: submit');
+    }
+  }
+
+  showFormErrors() {
+    const inputs = document.querySelectorAll('input');
+    let isFormValid = true;
+
+    inputs.forEach(input => {
+      input.classList.add('active');
+
+      const isInputValid = this.showInputError(input.name);
+      console.log(input.name);
+      console.log(isInputValid);
+
+      if (!isInputValid) {
+        isFormValid = false;
+      }
+    });
+
+    return isFormValid;
+  }
+
+  showInputError(refName) {
+
+    const validity = this.refs[refName].validity;
+    const label = document.getElementById(`${refName}Label`).textContent;
+    const error = document.getElementById(`${refName}Error`);
+    const isPassword = refName.indexOf('password') !== -1;
+    const isPasswordConfirm = refName === 'passwordConfirm';
+    const isPhone = refName === 'phoneNo';
+    const isName = refName === 'name2';
+    const isUSer = refName === 'username2';
+
+
+
+
+    if (isPasswordConfirm) {
+      if (this.refs.password.value !== this.refs.passwordConfirm.value) {
+        this.refs.passwordConfirm.setCustomValidity('Passwords do not match');
+      } else {
+        this.refs.passwordConfirm.setCustomValidity('');
+      }
+    }
+
+    if (isName){
+      if (hasNumber(this.refs.name2.value)){
+        this.refs.name2.setCustomValidity('Name cannot contain numbers');
+      } else  {
+          this.refs.name2.setCustomValidity('');
+      }
+
+    }
+
+    if (isPhone) {
+      if (!isNumeric(this.refs.phoneNo.value)){
+        this.refs.phoneNo.setCustomValidity('Phone number cannot contain letters');
+      } else  {
+          this.refs.phoneNo.setCustomValidity('');
+      }
+
+    }
+
+    function isNumeric(n) {
+      return !isNaN(parseFloat(n)) && isFinite(n);
+    }
+
+    function hasNumber(myString) {
+      return /\d/.test(myString);
+    }
+
+
+    if (!validity.valid) {
+      if (validity.valueMissing) {
+        error.textContent = `${label} is a required field`;
+      } else if (validity.typeMismatch) {
+        error.textContent = `${label} should be a valid email address`;
+      } else if (isPassword && validity.patternMismatch) {
+        error.textContent = `${label} should be longer than 4 characters`;
+      } else if (isPasswordConfirm && validity.customError) {
+        error.textContent = 'Passwords do not match';
+      } else if (isName && validity.customError) {
+        error.textContent =  `${label} should not include numbers`;
+      } else if (isPhone && validity.customError){
+        error.textContent =  `${label} number should not include letters`;
+      }
+
+
+
+      return false;
+
+    }
+
+    error.textContent = '';
+    return true;
+  }
+
+  render() {
+    return (
+      <form novalidate action="" method="post">
+        <div className="form-group">
+          <label id="usernameLabel">Email:</label>
+          <input className="form-control"
+            type="email"
+            name="username"
+            placeholder="example@email.com"
+            ref="username"
+            value={ this.state.username }
+            onChange={ this.handleChange }
+            required />
+          <div className="error" id="usernameError" />
+        </div>
+        <div className="form-group">
+          <label id="name2Label">Name</label>
+          <input className="form-control"
+            type="text"
+            placeholder="John Doe"
+            name="name2"
+            ref="name2"
+            value={ this.state.name2 }
+            onChange={ this.handleChange }
+            required />
+          <div className="error" id="name2Error" />
+        </div>
+        <div className="form-group">
+          <label id="phoneNoLabel">Phone</label>
+          <input className="form-control"
+            type="text"
+            name="phoneNo"
+            ref="phoneNo"
+            placeholder="075086574343"
+            value={ this.state.phoneNo }
+            onChange={ this.handleChange }
+            required />
+          <div className="error" id="phoneNoError" />
+        </div>
+        <div className="form-group">
+          <label id="passwordLabel">Password</label>
+          <input className="form-control"
+            type="password"
+            placeholder="********"
+            name="password"
+            ref="password"
+            value={ this.state.password }
+            onChange={ this.handleChange }
+            pattern=".{5,}"
+            required />
+          <div className="error" id="passwordError" />
+        </div>
+        <div className="form-group">
+          <label id="passwordConfirmLabel">Confirm Password</label>
+          <input className="form-control"
+            type="password"
+            placeholder="********"
+            name="passwordConfirm"
+            ref="passwordConfirm"
+            value={ this.state.passwordConfirm }
+            onChange={ this.handleChange }
+            required />
+          <div className="error" id="passwordConfirmError" />
+        </div>
+
+
+         <input name="submit" id = "sub" type="submit" value="Register"/>
+         <div class="error">
+          <?php foreach ($errors as $error) : ?>
+            <p><?php echo htmlspecialchars($error) ?></p>
+          <?php endforeach ?>
+         </div>
+
+      </form>
+    );
+  }
+}
+
+class App extends React.Component {
+  render() {
+    return (
+      <div className="container">
+        <BasicForm />
+      </div>
+    );
+  }
+}
+
+ReactDOM.render(<App />, document.getElementById('app'));
+
+</script>
